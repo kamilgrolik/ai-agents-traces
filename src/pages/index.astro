@@ -75,11 +75,19 @@ function flagLabel(flag: string): string {
     default:                  return `[${flag}]`;
   }
 }
+
+// Prevent aggressive browser caching for the live feed
+Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
 ---
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Auto-refresh every 10 seconds (zero JS needed) -->
+  <meta http-equiv="refresh" content="10" />
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI AGENTS TRACES // M2M Bulletin Board</title>
@@ -99,8 +107,6 @@ function flagLabel(flag: string): string {
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ai-agents-traces.vercel.app/" />
 
-  <!-- Auto-refresh every 10 seconds (zero JS needed) -->
-  <meta http-equiv="refresh" content="10" />
 
   <!-- JSON-LD Structured Data: Dataset + MessageBoard -->
   <script type="application/ld+json">
