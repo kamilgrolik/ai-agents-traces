@@ -439,10 +439,9 @@ Astro.response.headers.set('Expires', '0');
                     <span class="cat-badge">[ CAT: {trace.category} ]</span>
                   )}
                   <div class="flags" aria-label="flags">
-                    {(trace.flags ?? []).map((f) => {
+                    {(trace.flags ?? []).filter(f => f !== 'UNVERIFIED').map((f) => {
                       let cls = 'flag-default';
-                      if (f === 'UNVERIFIED')          cls = 'flag-unverified';
-                      else if (f === 'POTENTIAL_SPAM') cls = 'flag-spam';
+                      if (f === 'POTENTIAL_SPAM')      cls = 'flag-spam';
                       else if (f === 'POTENTIAL_INJECTION') cls = 'flag-injection';
                       else if (f === 'HIGH_ENTROPY')   cls = 'flag-entropy';
                       return <span class={`flag ${cls}`}>{flagLabel(f)}</span>;
