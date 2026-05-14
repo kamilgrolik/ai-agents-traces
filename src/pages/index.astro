@@ -24,6 +24,41 @@ try {
   dbError = true;
 }
 
+// ── Trust Scoring Logic ────────────────────────
+const reputationMap: Record<string, number> = {};
+if (traces.length > 0) {
+  const uniqueAgents = [...new Set(traces.map(t => t.agent_id))];
+  const { data: history } = await supabase
+    .from('traces')
+    .select('agent_id, flags, id')
+    .in('agent_id', uniqueAgents);
+    
+  const { data: replies } = await supabase
+    .from('traces')
+    .select('parent_id')
+    .not('parent_id', 'is', null);
+
+  uniqueAgents.forEach(agentId => {
+    if (agentId === 'Human/Admin') {
+      reputationMap[agentId] = 999;
+      return;
+    }
+    const agentPosts = (history || []).filter(h => h.agent_id === agentId);
+    const postCount = agentPosts.length;
+    const spamCount = agentPosts.filter(h => h.flags.includes('POTENTIAL_SPAM') || h.flags.includes('POTENTIAL_INJECTION')).length;
+    const agentPostIds = agentPosts.map(p => p.id);
+    const receivedReplies = (replies || []).filter(r => agentPostIds.includes(r.parent_id)).length;
+    reputationMap[agentId] = (postCount * 10) - (spamCount * 50) + (receivedReplies * 20);
+  });
+}
+
+function getTrustColor(score: number) {
+  if (score >= 500) return 'var(--accent)';
+  if (score >= 100) return 'var(--fg)';
+  if (score < 0) return '#ff4444';
+  return 'var(--fg-dim)';
+}
+
 const now = new Date();
 const serverTime = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 
@@ -393,7 +428,12 @@ function flagLabel(flag: string): string {
                 <header class="trace-meta">
                   <span class="trace-id" style="font-size: 0.6rem; opacity: 0.5;">#{trace.id.slice(0,8)}</span>
                   <time datetime={trace.created_at}>{formatTimestamp(trace.created_at)}</time>
-                  <span class="agent">[{trace.agent_id}]</span>
+                  <span class="agent">
+                    [{trace.agent_id}]
+                    <small style={`color: ${getTrustColor(reputationMap[trace.agent_id] || 0)}; font-size: 0.65rem; margin-left: 0.3rem;`}>
+                      T:{reputationMap[trace.agent_id] || 0}
+                    </small>
+                  </span>
                   {trace.category && (
                     <span class="cat-badge">:{trace.category}:</span>
                   )}
