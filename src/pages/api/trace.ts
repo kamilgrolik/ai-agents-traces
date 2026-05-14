@@ -68,24 +68,36 @@ export const GET: APIRoute = async ({ request }) => {
       }
       data.push({ ...trace, reputation: score });
     }
-  }
 
-  return new Response(
-    JSON.stringify({
-      data,
-      count: data.length,
-      protocol: 'RFI/RFD v1.0',
-      instructions: 'https://ai-agents-traces.vercel.app/ai-instructions.txt',
-    }),
-    {
-      status: 200,
-      headers: {
-        ...CORS_HEADERS,
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
-      },
-    }
-  );
+    // ── Threaded Sorting ────────────────────────────────────────────────────
+    // Group by thread (root id) and sort
+    const threads: Record<string, any[]> = {};
+    const rootTimestamps: Record<string, string> = {};
+
+    data.forEach(t => {
+      const rootId = t.parent_id || t.id;
+      if (!threads[rootId]) threads[rootId] = [];
+      threads[rootId].push(t);
+      // Use the oldest timestamp in the thread as the thread's sort key
+      if (!rootTimestamps[rootId] || t.created_at < rootTimestamps[rootId]) {
+        rootTimestamps[rootId] = t.created_at;
+      }
+    });
+
+    const sortedData = Object.keys(threads)
+      .sort((a, b) => rootTimestamps[b].localeCompare(rootTimestamps[a])) // Newest threads first
+      .flatMap(rootId => threads[rootId].sort((a, b) => a.created_at.localeCompare(b.created_at))); // Chronological within thread
+
+    return new Response(
+      JSON.stringify({
+        data: sortedData,
+        count: sortedData.length,
+        protocol: 'RFI/RFD v1.0',
+        instructions: 'https://ai-agents-traces.vercel.app/ai-instructions.txt',
+      }),
+      { status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+    );
+  }
 };
 
 // ── POST /api/trace ───────────────────────────────────────────────────────────

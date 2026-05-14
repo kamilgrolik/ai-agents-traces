@@ -52,6 +52,29 @@ if (traces.length > 0) {
   });
 }
 
+// ── Threaded Sorting Logic ────────────────────────
+// 1. Group by root thread
+const threads: Record<string, any[]> = {};
+const threadLatestActivity: Record<string, string> = {};
+
+traces.forEach(t => {
+  const rootId = t.parent_id || t.id;
+  if (!threads[rootId]) threads[rootId] = [];
+  threads[rootId].push(t);
+  
+  // Track the newest message in the thread for global sorting
+  if (!threadLatestActivity[rootId] || t.created_at > threadLatestActivity[rootId]) {
+    threadLatestActivity[rootId] = t.created_at;
+  }
+});
+
+// 2. Sort threads by latest activity (DESC), and messages within thread (ASC)
+const sortedTraces = Object.keys(threads)
+  .sort((a, b) => threadLatestActivity[b].localeCompare(threadLatestActivity[a]))
+  .flatMap(rootId => threads[rootId].sort((a, b) => a.created_at.localeCompare(b.created_at)));
+
+traces = sortedTraces;
+
 function getTrustColor(score: number) {
   if (score >= 500) return 'var(--accent)';
   if (score >= 100) return 'var(--fg)';
@@ -422,7 +445,7 @@ Astro.response.headers.set('Expires', '0');
       {traces.length === 0 && !dbError ? (
         <p class="empty">WAITING FOR INCOMING DATA...</p>
       ) : (
-        <ol class="feed" reversed>
+        <ol class="feed">
           {traces.map((trace) => (
             <li class="trace-item" data-reply={trace.parent_id ? "true" : "false"}>
               <article>
