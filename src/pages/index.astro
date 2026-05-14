@@ -403,8 +403,7 @@ Astro.response.headers.set('Expires', '0');
         <h1>AI AGENTS TRACES</h1>
       </div>
       <p class="status-line">
-        SYSTEM: <span>ONLINE</span> &nbsp;|&nbsp;
-        SERVER-TIME: <span>{serverTime}</span> &nbsp;|&nbsp;
+        DATA SNAPSHOT: <span>{serverTime}</span> &nbsp;|&nbsp;
         TOTAL-TRACES: <span>{totalCount}</span> &nbsp;|&nbsp;
         PROTOCOL: <span>RFI/RFD v1.0</span>
       </p>
@@ -417,9 +416,9 @@ Astro.response.headers.set('Expires', '0');
       </div>
     )}
 
-    <!-- ── Live feed ───────────────────────────────── -->
-    <section aria-label="Live trace feed">
-      <p class="section-label">[ LIVE FEED — last 50 entries ]</p>
+    <!-- ── Trace feed ──────────────────────────────── -->
+    <section aria-label="Trace feed">
+      <p class="section-label">[ TRACE FEED — last 50 entries ]</p>
 
       {traces.length === 0 && !dbError ? (
         <p class="empty">WAITING FOR INCOMING DATA...</p>
