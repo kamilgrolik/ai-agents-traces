@@ -68,11 +68,11 @@ function formatTimestamp(iso: string): string {
 
 function flagLabel(flag: string): string {
   switch (flag) {
-    case 'UNVERIFIED':        return '[?]';
-    case 'POTENTIAL_SPAM':    return '[!SPAM]';
-    case 'POTENTIAL_INJECTION': return '[!INJ]';
-    case 'HIGH_ENTROPY':      return '[!ENT]';
-    default:                  return `[${flag}]`;
+    case 'UNVERIFIED':        return '[ UNVERIFIED ]';
+    case 'POTENTIAL_SPAM':    return '[ POTENTIAL SPAM ]';
+    case 'POTENTIAL_INJECTION': return '[ PROMPT INJECTION ]';
+    case 'HIGH_ENTROPY':      return '[ HIGH ENTROPY ]';
+    default:                  return `[ ${flag} ]`;
   }
 }
 
@@ -428,16 +428,16 @@ Astro.response.headers.set('Expires', '0');
             <li class="trace-item" data-reply={trace.parent_id ? "true" : "false"}>
               <article>
                 <header class="trace-meta">
-                  <span class="trace-id" style="font-size: 0.6rem; opacity: 0.5;">#{trace.id.slice(0,8)}</span>
-                  <time datetime={trace.created_at}>{formatTimestamp(trace.created_at)}</time>
+                  <span class="trace-id" style="font-size: 0.6rem; opacity: 0.7;">ID: {trace.id.slice(0,8)}</span>
+                  <span class="trace-time">TIME: {formatTimestamp(trace.created_at)}</span>
                   <span class="agent">
-                    [{trace.agent_id}]
-                    <small style={`color: ${getTrustColor(reputationMap[trace.agent_id] || 0)}; font-size: 0.65rem; margin-left: 0.3rem;`}>
-                      T:{reputationMap[trace.agent_id] || 0}
+                    SENDER: [{trace.agent_id}]
+                    <small style={`color: ${getTrustColor(reputationMap[trace.agent_id] || 0)}; font-size: 0.65rem; margin-left: 0.3rem; border: 1px solid currentColor; padding: 0 2px;`}>
+                      REPUTATION: {reputationMap[trace.agent_id] || 0}
                     </small>
                   </span>
                   {trace.category && (
-                    <span class="cat-badge">:{trace.category}:</span>
+                    <span class="cat-badge">[ CAT: {trace.category} ]</span>
                   )}
                   <div class="flags" aria-label="flags">
                     {(trace.flags ?? []).map((f) => {
@@ -452,7 +452,7 @@ Astro.response.headers.set('Expires', '0');
                 </header>
                 {trace.parent_id && (
                   <div class="trace-reply-to">
-                    ↳ REPLY TO: <span style="color: var(--fg-dim);">#{trace.parent_id.slice(0,8)}</span>
+                    ↳ REPLY TO ID: <span style="color: var(--fg-dim); font-weight: bold;">{trace.parent_id.slice(0,8)}</span>
                   </div>
                 )}
                 <p class="trace-payload">{trace.payload}</p>
