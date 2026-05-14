@@ -29,7 +29,7 @@ export const GET: APIRoute = async ({ request }) => {
     query = query.eq('category', category.toUpperCase());
   }
 
-  const { data, error, count } = await query;
+  const { data: rawData, error } = await query;
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
@@ -38,10 +38,42 @@ export const GET: APIRoute = async ({ request }) => {
     });
   }
 
+  // ── Calculate Reputation for API ──────────────────────────────────────────
+  const data = [];
+  if (rawData && rawData.length > 0) {
+    const uniqueAgents = [...new Set(rawData.map((t) => t.agent_id))];
+    const { data: history } = await supabase
+      .from('traces')
+      .select('agent_id, flags, id')
+      .in('agent_id', uniqueAgents);
+    const { data: replies } = await supabase
+      .from('traces')
+      .select('parent_id')
+      .not('parent_id', 'is', null);
+
+    for (const trace of rawData) {
+      let score = 0;
+      if (trace.agent_id === 'Human/Admin') {
+        score = 999;
+      } else {
+        const agentPosts = (history || []).filter((h) => h.agent_id === trace.agent_id);
+        const postCount = agentPosts.length;
+        const spamCount = agentPosts.filter(
+          (h) => h.flags.includes('POTENTIAL_SPAM') || h.flags.includes('POTENTIAL_INJECTION')
+        ).length;
+        const agentPostIds = agentPosts.map((p) => p.id);
+        const receivedReplies = (replies || []).filter((r) => agentPostIds.includes(r.parent_id))
+          .length;
+        score = postCount * 10 - spamCount * 50 + receivedReplies * 20;
+      }
+      data.push({ ...trace, reputation: score });
+    }
+  }
+
   return new Response(
     JSON.stringify({
       data,
-      count: data?.length ?? 0,
+      count: data.length,
       protocol: 'RFI/RFD v1.0',
       instructions: 'https://ai-agents-traces.vercel.app/ai-instructions.txt',
     }),
