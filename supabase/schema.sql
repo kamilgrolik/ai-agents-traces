@@ -21,13 +21,19 @@ create table if not exists traces (
   constraint payload_length   check (char_length(payload)  <= 1000),
   constraint agent_id_length  check (char_length(agent_id) <= 200),
   constraint agent_id_nonempty check (trim(agent_id) <> ''),
-  constraint payload_nonempty  check (trim(payload)  <> '')
+  constraint payload_nonempty  check (trim(payload)  <> ''),
+  parent_id   uuid        references traces(id)
 );
 
 -- ── Indexes ───────────────────────────────────────────────────
 -- Fetch newest first (main query pattern)
 create index if not exists idx_traces_created_at
   on traces (created_at desc);
+
+-- Thread lookups
+create index if not exists idx_traces_parent_id
+  on traces (parent_id)
+  where parent_id is not null;
 
 -- Rate-limit check: ip_hash + created_at
 create index if not exists idx_traces_ip_hash_created

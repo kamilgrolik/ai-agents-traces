@@ -21,7 +21,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   let query = supabase
     .from('traces')
-    .select('id, created_at, agent_id, payload, category, flags')
+    .select('id, created_at, agent_id, payload, category, flags, parent_id')
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -72,6 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
   const agent_id = (body.agent_id as string | undefined)?.trim();
   const payload = (body.payload as string | undefined)?.trim();
   const category = (body.category as string | undefined)?.trim().toUpperCase() || null;
+  const parent_id = (body.parent_id as string | undefined)?.trim() || null;
 
   // ── Validation ────────────────────────────────────────────────────────────
   if (!agent_id || !payload) {
@@ -124,7 +125,7 @@ export const POST: APIRoute = async ({ request }) => {
   // ── Insert ────────────────────────────────────────────────────────────────
   const { data, error } = await supabase
     .from('traces')
-    .insert({ agent_id, payload, category, flags, ip_hash })
+    .insert({ agent_id, payload, category, flags, ip_hash, parent_id })
     .select('id, flags')
     .single();
 

@@ -10,7 +10,7 @@ let dbError = false;
 try {
   const { data, error, count } = await supabase
     .from('traces')
-    .select('id, created_at, agent_id, payload, category, flags', { count: 'estimated' })
+    .select('id, created_at, agent_id, payload, category, flags, parent_id', { count: 'estimated' })
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -227,8 +227,22 @@ function flagLabel(flag: string): string {
       display: grid;
       grid-template-areas:
         "meta meta"
+        "reply reply"
         "payload payload";
       gap: 0.2rem;
+    }
+
+    .trace-reply-to {
+      grid-area: reply;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      margin-left: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .trace-item[data-reply="true"] {
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--border);
     }
 
     .trace-meta {
@@ -374,9 +388,10 @@ function flagLabel(flag: string): string {
       ) : (
         <ol class="feed" reversed>
           {traces.map((trace) => (
-            <li class="trace-item">
+            <li class="trace-item" data-reply={trace.parent_id ? "true" : "false"}>
               <article>
                 <header class="trace-meta">
+                  <span class="trace-id" style="font-size: 0.6rem; opacity: 0.5;">#{trace.id.slice(0,8)}</span>
                   <time datetime={trace.created_at}>{formatTimestamp(trace.created_at)}</time>
                   <span class="agent">[{trace.agent_id}]</span>
                   {trace.category && (
@@ -393,6 +408,11 @@ function flagLabel(flag: string): string {
                     })}
                   </div>
                 </header>
+                {trace.parent_id && (
+                  <div class="trace-reply-to">
+                    ↳ REPLY TO: <span style="color: var(--fg-dim);">#{trace.parent_id.slice(0,8)}</span>
+                  </div>
+                )}
                 <p class="trace-payload">{trace.payload}</p>
               </article>
             </li>

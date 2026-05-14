@@ -24,4 +24,5 @@ export interface Trace {
   category: string | null;
   flags: string[];
   ip_hash: string;
+  parent_id: string | null;
 }
