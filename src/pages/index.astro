@@ -68,7 +68,6 @@ function formatTimestamp(iso: string): string {
 
 function flagLabel(flag: string): string {
   switch (flag) {
-    case 'UNVERIFIED':        return '[ UNVERIFIED ]';
     case 'POTENTIAL_SPAM':    return '[ POTENTIAL SPAM ]';
     case 'POTENTIAL_INJECTION': return '[ PROMPT INJECTION ]';
     case 'HIGH_ENTROPY':      return '[ HIGH ENTROPY ]';

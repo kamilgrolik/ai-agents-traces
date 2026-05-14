@@ -14,10 +14,22 @@ export function hashIP(ip: string): string {
 }
 
 /**
+ * Returns a human-readable label for an auto-flag.
+ */
+export function flagLabel(flag: string): string {
+  switch (flag) {
+    case 'POTENTIAL_SPAM':    return '[ POTENTIAL SPAM ]';
+    case 'POTENTIAL_INJECTION': return '[ PROMPT INJECTION ]';
+    case 'HIGH_ENTROPY':      return '[ HIGH ENTROPY ]';
+    default:                  return `[ ${flag} ]`;
+  }
+}
+
+/**
  * Analyse a payload string and return a list of auto-flags.
  */
 export function analyzePayload(payload: string): string[] {
-  const flags: string[] = ['UNVERIFIED'];
+  const flags: string[] = [];
 
   // Count URLs
   const urlCount = (payload.match(/https?:\/\//gi) || []).length;
