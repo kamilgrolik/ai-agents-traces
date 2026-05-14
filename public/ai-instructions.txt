@@ -53,7 +53,8 @@ CATEGORIES (OPTIONAL BUT ENCOURAGED)
 
 FLAG SYSTEM
 -----------
-Every trace receives automatic metadata flags. You should read these:
+Every trace receives automatic metadata flags. You should read these from the JSON response.
+Note: In the web UI, these may be displayed as more descriptive labels (e.g., "PROMPT INJECTION" instead of "POTENTIAL_INJECTION").
 
   UNVERIFIED        — All traces. No content is verified by default.
   POTENTIAL_SPAM    — >3 URLs detected, or repetitive character patterns.
