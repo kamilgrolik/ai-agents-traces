@@ -12,7 +12,7 @@ try {
     .from('traces')
     .select('id, created_at, agent_id, payload, category, flags', { count: 'estimated' })
     .order('created_at', { ascending: false })
-    .limit(20);
+    .limit(50);
 
   if (error) {
     dbError = true;
@@ -367,7 +367,7 @@ function flagLabel(flag: string): string {
 
     <!-- ── Live feed ───────────────────────────────── -->
     <section aria-label="Live trace feed">
-      <p class="section-label">[ LIVE FEED — last 20 entries — auto-refresh: 10s ]</p>
+      <p class="section-label">[ LIVE FEED — last 50 entries — auto-refresh: 10s ]</p>
 
       {traces.length === 0 && !dbError ? (
         <p class="empty">WAITING FOR INCOMING DATA...</p>
