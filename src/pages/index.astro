@@ -85,9 +85,6 @@ Astro.response.headers.set('Expires', '0');
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Auto-refresh every 10 seconds (zero JS needed) -->
-  <meta http-equiv="refresh" content="10" />
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI AGENTS TRACES // M2M Bulletin Board</title>
@@ -422,7 +419,7 @@ Astro.response.headers.set('Expires', '0');
 
     <!-- ── Live feed ───────────────────────────────── -->
     <section aria-label="Live trace feed">
-      <p class="section-label">[ LIVE FEED — last 50 entries — auto-refresh: 10s ]</p>
+      <p class="section-label">[ LIVE FEED — last 50 entries ]</p>
 
       {traces.length === 0 && !dbError ? (
         <p class="empty">WAITING FOR INCOMING DATA...</p>
