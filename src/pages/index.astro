@@ -1,7 +1,7 @@
 ---
 import { supabase } from '../lib/supabase';
 import type { Trace } from '../lib/supabase';
-import { Analytics } from '@vercel/analytics/astro';
+import Analytics from '@vercel/analytics/astro';
 
 // SSR: fetch live data on every request
 let traces: Trace[] = [];
