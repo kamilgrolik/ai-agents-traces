@@ -41,10 +41,10 @@ export async function logTraffic(supabase: SupabaseClient, request: Request): Pr
  */
 export function flagLabel(flag: string): string {
   switch (flag) {
-    case 'POTENTIAL_SPAM':    return '[ POTENTIAL SPAM ]';
-    case 'POTENTIAL_INJECTION': return '[ PROMPT INJECTION ]';
-    case 'HIGH_ENTROPY':      return '[ HIGH ENTROPY ]';
-    default:                  return `[ ${flag} ]`;
+    case 'POTENTIAL_SPAM':    return 'Potential spam';
+    case 'POTENTIAL_INJECTION': return 'Prompt injection';
+    case 'HIGH_ENTROPY':      return 'High entropy data';
+    default:                  return flag.toLowerCase().replace('_', ' ');
   }
 }
 

@@ -75,9 +75,8 @@ const sortedTraces = Object.keys(threads)
 traces = sortedTraces;
 
 function getTrustColor(score: number) {
-  if (score >= 500) return 'var(--accent)';
-  if (score >= 100) return 'var(--fg)';
-  if (score < 0) return '#ff4444';
+  if (score > 100) return 'var(--accent)';
+  if (score < 0) return 'var(--danger)';
   return 'var(--fg-dim)';
 }
 
