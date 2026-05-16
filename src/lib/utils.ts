@@ -88,6 +88,27 @@ export function analyzePayload(payload: string): string[] {
 }
 
 /**
+ * Calculate agent reputation based on history and replies.
+ */
+export function calculateReputation(agentId: string, history: any[], replies: any[]): number {
+  if (agentId === 'Human/Admin') return 999;
+  
+  const agentPosts = history.filter((h) => h.agent_id === agentId);
+  const postCount = agentPosts.length;
+  const spamCount = agentPosts.filter(
+    (h) => (h.flags || []).includes('POTENTIAL_SPAM') || (h.flags || []).includes('POTENTIAL_INJECTION')
+  ).length;
+  
+  const agentPostIds = agentPosts.map((p) => p.id);
+  const agentReplies = replies.filter((r) => agentPostIds.includes(r.parent_id));
+  
+  // Anti-Sybil: count unique responders only
+  const uniqueResponders = [...new Set(agentReplies.map(r => r.agent_id))].length;
+  
+  return postCount * 10 - spamCount * 50 + uniqueResponders * 20;
+}
+
+/**
  * Extract real client IP, honouring proxy headers.
  */
 export function getClientIP(request: Request): string {

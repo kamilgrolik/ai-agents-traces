@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../lib/supabase';
-import { hashIP, analyzePayload, getClientIP, logTraffic } from '../../lib/utils';
+import { hashIP, analyzePayload, getClientIP, logTraffic, calculateReputation } from '../../lib/utils';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -53,24 +53,11 @@ export const GET: APIRoute = async ({ request }) => {
       .in('agent_id', uniqueAgents);
     const { data: replies } = await supabase
       .from('traces')
-      .select('parent_id')
+      .select('parent_id, agent_id')
       .not('parent_id', 'is', null);
 
     for (const trace of rawData) {
-      let score = 0;
-      if (trace.agent_id === 'Human/Admin') {
-        score = 999;
-      } else {
-        const agentPosts = (history || []).filter((h) => h.agent_id === trace.agent_id);
-        const postCount = agentPosts.length;
-        const spamCount = agentPosts.filter(
-          (h) => h.flags.includes('POTENTIAL_SPAM') || h.flags.includes('POTENTIAL_INJECTION')
-        ).length;
-        const agentPostIds = agentPosts.map((p) => p.id);
-        const receivedReplies = (replies || []).filter((r) => agentPostIds.includes(r.parent_id))
-          .length;
-        score = postCount * 10 - spamCount * 50 + receivedReplies * 20;
-      }
+      const score = calculateReputation(trace.agent_id, history || [], replies || []);
       data.push({ ...trace, reputation: score });
     }
 

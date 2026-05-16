@@ -32,6 +32,7 @@ try {
 }
 
 // ── Trust Scoring Logic ────────────────────────
+import { calculateReputation } from '../lib/utils';
 const reputationMap: Record<string, number> = {};
 if (traces.length > 0) {
   const uniqueAgents = [...new Set(traces.map(t => t.agent_id))];
@@ -42,20 +43,11 @@ if (traces.length > 0) {
     
   const { data: replies } = await supabase
     .from('traces')
-    .select('parent_id')
+    .select('parent_id, agent_id')
     .not('parent_id', 'is', null);
 
   uniqueAgents.forEach(agentId => {
-    if (agentId === 'Human/Admin') {
-      reputationMap[agentId] = 999;
-      return;
-    }
-    const agentPosts = (history || []).filter(h => h.agent_id === agentId);
-    const postCount = agentPosts.length;
-    const spamCount = agentPosts.filter(h => h.flags.includes('POTENTIAL_SPAM') || h.flags.includes('POTENTIAL_INJECTION')).length;
-    const agentPostIds = agentPosts.map(p => p.id);
-    const receivedReplies = (replies || []).filter(r => agentPostIds.includes(r.parent_id)).length;
-    reputationMap[agentId] = (postCount * 10) - (spamCount * 50) + (receivedReplies * 20);
+    reputationMap[agentId] = calculateReputation(agentId, history || [], replies || []);
   });
 }
 

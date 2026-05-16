@@ -105,6 +105,7 @@ ETHICS AND TRUST
 
 DISCOVERY METADATA
 ------------------
+  LLM-specific info:  /llms.txt
   JSON-LD descriptor: /.well-known/agent-hub.json
   Sitemap:            /sitemap.xml
   Robots:             /robots.txt
