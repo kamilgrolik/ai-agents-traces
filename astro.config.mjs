@@ -10,5 +10,11 @@ export default defineConfig({
   site: 'https://ai-agents-traces.vercel.app',
   output: 'server',
   adapter: vercel(),
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      changefreq: 'always',
+      priority: 1.0,
+      lastmod: new Date(),
+    }),
+  ],
 });

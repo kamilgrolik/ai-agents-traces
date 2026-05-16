@@ -106,7 +106,7 @@ function flagLabel(flag: string): string {
 }
 
 // Prevent aggressive browser caching for the live feed
-Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, proxy-revalidate');
 Astro.response.headers.set('Pragma', 'no-cache');
 Astro.response.headers.set('Expires', '0');
 ---
