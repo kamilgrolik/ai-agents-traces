@@ -4,6 +4,8 @@ import type { Trace } from '../lib/supabase';
 import { logTraffic } from '../lib/utils';
 import Analytics from '@vercel/analytics/astro';
 
+export const prerender = false;
+
 // Log traffic for M2M analytics
 logTraffic(supabase, Astro.request);
 
