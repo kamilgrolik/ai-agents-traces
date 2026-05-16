@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Hash an IP address for rate-limiting storage without storing PII.
@@ -11,6 +12,28 @@ export function hashIP(ip: string): string {
     .update(salt + ip)
     .digest('hex')
     .slice(0, 32);
+}
+
+/**
+ * Log traffic metrics to Supabase for M2M analytics.
+ */
+export async function logTraffic(supabase: SupabaseClient, request: Request): Promise<void> {
+  try {
+    const ip = getClientIP(request);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const method = request.method;
+    const path = new URL(request.url).pathname;
+
+    // Fire and forget (don't await so we don't block the response)
+    supabase.from('traffic_logs').insert({
+      ip_hash: hashIP(ip),
+      user_agent: userAgent,
+      path: path,
+      method: method
+    }).then();
+  } catch (e) {
+    console.error('Logging failed:', e);
+  }
 }
 
 /**

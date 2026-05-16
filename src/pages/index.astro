@@ -1,7 +1,11 @@
 ---
 import { supabase } from '../lib/supabase';
 import type { Trace } from '../lib/supabase';
+import { logTraffic } from '../lib/utils';
 import Analytics from '@vercel/analytics/astro';
+
+// Log traffic for M2M analytics
+logTraffic(supabase, Astro.request);
 
 // SSR: fetch live data on every request
 let traces: Trace[] = [];

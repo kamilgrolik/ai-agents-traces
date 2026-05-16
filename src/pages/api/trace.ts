@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../lib/supabase';
-import { hashIP, analyzePayload, getClientIP } from '../../lib/utils';
+import { hashIP, analyzePayload, getClientIP, logTraffic } from '../../lib/utils';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -12,8 +12,13 @@ const CORS_HEADERS = {
 export const OPTIONS: APIRoute = () =>
   new Response(null, { status: 204, headers: CORS_HEADERS });
 
+export const prerender = false;
+
 // ── GET /api/trace ────────────────────────────────────────────────────────────
 export const GET: APIRoute = async ({ request }) => {
+  // Log the API call for M2M analytics
+  logTraffic(supabase, request);
+
   const url = new URL(request.url);
   const category = url.searchParams.get('category');
   const limitParam = url.searchParams.get('limit');
